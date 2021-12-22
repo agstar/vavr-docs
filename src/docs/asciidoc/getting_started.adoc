@@ -1,8 +1,8 @@
-== Getting started
+== 开始
 
-Projects that include Vavr need to target Java 1.8 at minimum.
+使用 Vavr 的项目必须满足 Java 1.8 的最低要求。
 
-The .jar is available at http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22io.vavr%22%20a%3A%22vavr%22[Maven Central].
+`.jar` 文件可以在 http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22io.vavr%22%20a%3A%22vavr%22[Maven Central] 下载。
 
 === Gradle
 
