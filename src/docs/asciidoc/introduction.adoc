@@ -1,26 +1,42 @@
-== Introduction
+== 介绍
 
-Vavr (formerly called Javaslang) is a functional library for Java 8+ that provides persistent data types and functional control structures.
+Vavr 是一个针对 Java 8+ 的函数式编程库，提供了可持久化数据类型和函数式控制结构。
 
 === Functional Data Structures in Java 8 with Vavr
 
-Java 8’s https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html[lambdas (λ)] empower us to create wonderful API’s. They incredibly increase the expressiveness of the language.
+Java 8’s https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html[lambdas (λ)] empower us to create wonderful API’s.
+They incredibly increase the expressiveness of the language.
 
-http://vavr.io/[Vavr] leveraged lambdas to create various new features based on functional patterns. One of them is a functional collection library that is intended to be a replacement for Java’s standard collections.
+Java 8 的 https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html[lambdas (λ)] 表达式使我们可以创建非常棒的 API。它们难以置信地增加了语言的表达能力。
+
+http://vavr.io/[Vavr] leveraged lambdas to create various new features based on functional patterns.
+One of them is a functional collection library that is intended to be a replacement for Java’s standard collections.
+
+http://vavr.io/[Vavr] 利用 lambda 根据功能模式创建各种新功能，其中一个特性是一个函数式集合库，它被设计为代替 Java 的标准集合库。
 
 image::images/vavr-collections.png[Vavr Collections]
 
-__(This is just a bird’s view, you will find a human-readable version below.)__
+__(这只是一个鸟瞰图，你可以在下面找到一个可读的版本 .)__
 
-=== Functional Programming
+=== 函数式编程
 
-Before we deep-dive into the details about the data structures I want to talk about some basics. This will make it clear why I created Vavr and specifically new Java collections.
+在我们深入了解数据结构之前，我们先介绍一些基本的内容。这将清楚地告诉我们为什么我创建了 Vavr，特别是 Java 的标准集合库。
 
-==== Side-Effects
+====  副作用
 
-Java applications are typically plentiful of https://en.wikipedia.org/wiki/Side_effect_(computer_science)[side-effects]. They mutate some sort of state, maybe the outer world. Common side effects are changing objects or variables __in place__, printing to the console, writing to a log file or to a database. Side-effects are considered __harmful__ if they affect the semantics of our program in an undesirable way.
+Java applications are typically plentiful of https://en.wikipedia.org/wiki/Side_effect_(computer_science)[side-effects].
+They mutate some sort of state, maybe the outer world.
+Common side effects are changing objects or variables __in place__, printing to the console, writing to a log file or to a database.
+Side-effects are considered __harmful__ if they affect the semantics of our program in an undesirable way.
 
-For example, if a function throws an exception and this exception is __interpreted__, it is considered as side-effect that __affects our program__. Furthermore http://c2.com/cgi/wiki?DontUseExceptionsForFlowControl[exceptions are like non-local goto-statements]. They break the normal control-flow. However, real-world applications do perform side-effects.
+Java 应用通常包含大量的 https://en.wikipedia.org/wiki/Side_effect_(computer_science)[副作用]。它们会改变一些状态，可能是外部世界。常见的副作用是**在某些地方**改变对象或变量 ，打印到控制台，写入日志文件或数据库。副作用被认为是 **危险的** 如果它们对我们的程序的语义造成不可接受的影响。
+
+For example, if a function throws an exception and this exception is __interpreted__, it is considered as side-effect that __affects our program__.
+Furthermore http://c2.com/cgi/wiki?DontUseExceptionsForFlowControl[exceptions are like non-local goto-statements].
+They break the normal control-flow.
+However, real-world applications do perform side-effects.
+
+例如，如果一个函数抛出异常，并且这个异常被**中断**，那么这个异常被认为是一个副作用，它会影响我们的程序。此外，http://c2.com/cgi/wiki?DontUseExceptionsForFlowControl[异常是像非本地跳转语句一样]。它们会中断正常的控制流。然而，真实的应用程序会执行副作用。
 
 [source,java]
 ----
@@ -33,6 +49,8 @@ int divide(int dividend, int divisor) {
 
 In a functional setting we are in the favorable situation to encapsulate the side-effect in a Try:
 
+在一个函数设置中，我们是在可接受的状态下将副作用封装在 Try 中，以避免抛出异常。
+
 [source,java]
 ----
 // = Success(result) or Failure(exception)
@@ -42,45 +60,70 @@ Try<Integer> divide(Integer dividend, Integer divisor) {
 
 ----
 
-This version of divide does not throw any exception anymore. We made the possible failure explicit by using the type Try.
+This version of divide does not throw any exception anymore.
+We made the possible failure explicit by using the type Try.
 
-==== Referential Transparency
+这种版本的除法不会再抛出任何异常。我们通过使用 Try 类型来明确可能的失败。
 
-A function, or more generally an expression, is called https://en.wikipedia.org/wiki/Referential_transparency[referentially transparent] if a call can be replaced by its value without affecting the behavior of the program. Simply spoken, given the same input the output is always the same.
+==== Referential Transparency 引用透明
+
+A function, or more generally an expression, is called https://en.wikipedia.org/wiki/Referential_transparency[referentially transparent] if a call can be replaced by its value without affecting the behavior of the program.
+Simply spoken, given the same input the output is always the same.
+
+一个函数，或者通常的一个表达式，如果调用可以被其值替换，而不影响程序的行为被称为[引用透明]。简单地说，给定相同的输入，输出总是相同的。
 
 [source,java]
 ----
-// not referentially transparent
+// 非引用透明
 Math.random();
 
-// referentially transparent
+// 引用透明
 Math.max(1, 2);
 
 ----
 
-A function is called https://en.wikipedia.org/wiki/Pure_function[pure] if all expressions involved are referentially transparent. An application composed of pure functions will most probably __just work__ if it compiles. We are able to reason about it. Unit tests are easy to write and debugging becomes a relict of the past.
+A function is called https://en.wikipedia.org/wiki/Pure_function[pure] if all expressions involved are referentially transparent.
+An application composed of pure functions will most probably __just work__ if it compiles.
+We are able to reason about it.
+Unit tests are easy to write and debugging becomes a relict of the past.
+
+如果所涉及的所有表达式都是引用透明的，则称为 https://en.wikipedia.org/wiki/Pure_function[纯]函数。
 
 ==== Thinking in Values
 
-Rich Hickey, the creator of Clojure, gave a great talk about https://www.youtube.com/watch?v=-6BsiVyC1kM[The Value of Values]. The most interesting values are https://en.wikipedia.org/wiki/Immutable_object[immutable] values. The main reason is that immutable values
+Rich Hickey, the creator of Clojure, gave a great talk about https://www.youtube.com/watch?v=-6BsiVyC1kM[The Value of Values].
+The most interesting values are https://en.wikipedia.org/wiki/Immutable_object[immutable] values.
+The main reason is that immutable values
 
-*   are inherently thread-safe and hence do not need to be synchronized
-*   are stable regarding __equals__ and __hashCode__ and thus are reliable hash keys
-*   do not need to be cloned
-*   behave type-safe when used in unchecked covariant casts (Java-specific)
-The key to a better Java is to use __immutable values__ paired with __referentially transparent functions__.
+Rich Hickey，Clojure 的创造人，就 https://www.youtube.com/watch?v=-6BsiVyC1kM[The Value of Values]进行了精彩的演讲。最有趣的值是 https://en.wikipedia.org/wiki/Immutable_object[不变]的值。主要原因是不可变的值
+
+* 本质上是线程安全的，因此不需要同步
+* 对于 **equals** 和 **hashCode** 是稳定的，因此是可靠的哈希键
+* 不需要克隆
+* 在未检查的协变强制转换中使用时行为类型安全（特定于 Java）
+
+实现更好的 Java 的关键是使用**不可变值**与**引用透明函数**配对。
 
 Vavr provides the necessary http://static.javadoc.io/io.vavr/vavr/0.10.4/io/vavr/control/package-summary.html[controls] and https://static.javadoc.io/io.vavr/vavr/0.10.4/io/vavr/collection/package-summary.html[collections] to accomplish this goal in every-day Java programming.
 
+Vavr提供了必要的 http://static.javadoc.io/io.vavr/vavr/0.10.4/io/vavr/control/package-summary.html[控件]和 https://static.javadoc.io/io.vavr/vavr/0.10.4/io/vavr/collection/package-summary.html[集合]，以在每天的Java编程中实现这一目标。
+
 === Data Structures in a Nutshell
 
-Vavr’s collection library comprises of a rich set of functional data structures built on top of lambdas. The only interface they share with Java’s original collections is Iterable. The main reason is that the mutator methods of Java’s collection interfaces do not return an object of the underlying collection type.
+Vavr’s collection library comprises of a rich set of functional data structures built on top of lambdas.
+The only interface they share with Java’s original collections is Iterable.
+The main reason is that the mutator methods of Java’s collection interfaces do not return an object of the underlying collection type.
 
-We will see why this is so essential by taking a look at the different types of data structures.
+Vavr 的集合库由构建在 lambda 之上的一组丰富的功能数据结构组成。它们与 Java 原始集合共享的唯一接口是 Iterable 。主要原因是 Java 集合接口的更改器方法不返回底层集合类型的对象。
 
-==== Mutable Data Structures
+NOTE: *更改器方法（mutator method）* +
+通俗来说就是会修改对象本身的方法。例如 Java Bean 的 set 方法。 相对的还有 *访问器方法*（accessor method），指的是不会修改对象本身的方法。例如 get 方法
 
-Java is an object-oriented programming language. We encapsulate state in objects to achieve data hiding and provide mutator methods to control the state. The https://en.wikipedia.org/wiki/Java_collections_framework[Java collections framework (JCF)] is built upon this idea.
+我们将通过查看不同类型的数据结构来了解这一点为何如此重要。
+
+==== 可变数据结构
+
+Java是一种面向对象的编程语言。我们将状态封装在对象中以实现数据隐藏，并提供更改器方法来控制状态。 https://en.wikipedia.org/wiki/Java_collections_framework[Java集合框架（JCF）]就是基于这一思想构建的。
 
 [source,java]
 ----
@@ -91,11 +134,18 @@ interface Collection<E> {
 
 ----
 
-Today I comprehend a __void__ return type as a smell. It is evidence that https://en.wikipedia.org/wiki/Side_effect_(computer_science)[side-effects] take place, state is mutated. __Shared__ mutable state is an important source of failure, not only in a concurrent setting.
+Today I comprehend a __void__ return type as a smell.
+It is evidence that https://en.wikipedia.org/wiki/Side_effect_(computer_science)[side-effects] take place, state is mutated.
+__Shared__ mutable state is an important source of failure, not only in a concurrent setting.
 
-==== Immutable Data Structures
+今天，我把 void 返回类型理解为一种气味。有证据表明 https://en.wikipedia.org/wiki/Side_effect_(computer_science)[副作用]发生了，状态发生了变化。共享可变状态是一个重要的故障源，而不仅仅是在并发设置中。
 
-https://en.wikipedia.org/wiki/Immutable_object[Immutable] data structures cannot be modified after their creation. In the context of Java they are widely used in the form of collection wrappers.
+==== 不可变数据结构
+
+https://en.wikipedia.org/wiki/Immutable_object[Immutable] data structures cannot be modified after their creation.
+In the context of Java they are widely used in the form of collection wrappers.
+
+https://en.wikipedia.org/wiki/Immutable_object[不可变]数据结构在创建后就无法修改。在Java环境中，它们以集合包装器的形式被广泛使用。
 
 [source,java]
 ----
@@ -106,27 +156,45 @@ list.add("why not?");
 
 ----
 
-There are various libraries that provide us with similar utility methods. The result is always an unmodifiable view of the specific collection. Typically it will throw at runtime when we call a mutator method.
+有许多库为我们提供了类似的工具方法。结果始终是特定集合的不可修改视图。通常，当我们调用更改器方法时，它会在运行时抛出。
 
-==== Persistent Data Structures
+==== 持久数据结构
 
-A https://en.wikipedia.org/wiki/Persistent_data_structure[persistent data structure] does preserve the previous version of itself when being modified and is therefore __effectively__ immutable. Fully persistent data structures allow both updates and queries on any version.
+https://en.wikipedia.org/wiki/Persistent_data_structure[持久数据结构]在被修改时会保留其自身的早期版本，因此实际上是不可变的。完全持久化的数据结构允许对任何版本进行更新和查询。
 
-Many operations perform only small changes. Just copying the previous version wouldn’t be efficient. To save time and memory, it is crucial to identify similarities between two versions and share as much data as possible.
+Many operations perform only small changes.
+Just copying the previous version wouldn’t be efficient.
+To save time and memory, it is crucial to identify similarities between two versions and share as much data as possible.
 
-This model does not impose any implementation details. Here come functional data structures into play.
+许多操作只执行小的更改。仅仅复制以前的版本是没有效率的。为了节省时间和内存，确定两个版本之间的相似性并尽可能多地共享数据至关重要。
 
-=== Functional Data Structures
+This model does not impose any implementation details.
+Here come functional data structures into play.
+该模型没有强加任何实现细节。功能数据结构在这里发挥作用。
 
-Also known as https://en.wikipedia.org/wiki/Purely_functional[__purely__ functional data structures], these are __immutable__ and __persistent__. The methods of functional data structures are __referentially transparent__.
+=== 函数式数据结构
 
-Vavr features a wide range of the most-commonly used functional data structures. The following examples are explained in-depth.
+Also known as https://en.wikipedia.org/wiki/Purely_functional[__purely__ functional data structures], these are __immutable__ and __persistent__.
+The methods of functional data structures are __referentially transparent__.
+
+https://en.wikipedia.org/wiki/Purely_functional[函数式数据结构]，它们是不可变和持久的。函数数据结构的方法是引用透明的。
+
+Vavr features a wide range of the most-commonly used functional data structures.
+The following examples are explained in-depth.
+
+Vavr 具有广泛的最常用功能数据结构。下面的例子将深入解释。
 
 ==== Linked List
 
-One of the most popular and also simplest functional data structures is the https://en.wikipedia.org/wiki/Linked_list[(singly) linked List]. It has a __head__ element and a __tail__ List. A linked List behaves like a Stack which follows the https://en.wikipedia.org/wiki/Stack_(abstract_data_type)[last in, first out (LIFO)] method.
+One of the most popular and also simplest functional data structures is the https://en.wikipedia.org/wiki/Linked_list[(singly) linked List].
+It has a __head__ element and a __tail__ List.
+A linked List behaves like a Stack which follows the https://en.wikipedia.org/wiki/Stack_(abstract_data_type)[last in, first out (LIFO)] method.
+
+最流行也是最简单的函数数据结构之一是 https://en.wikipedia.org/wiki/Linked_list[（单）链表]。它有一个 head 元素和一个 tail 列表。链表的行为类似于遵循 https://en.wikipedia.org/wiki/Stack_(abstract_data_type)[后进先出（LIFO）]方法的堆栈。
 
 In http://vavr.io/[Vavr] we instantiate a List like this:
+
+在 http://vavr.io/[Vavr] 中，我们通过这种方式实例化列表：
 
 [source,java]
 ----
@@ -134,11 +202,16 @@ In http://vavr.io/[Vavr] we instantiate a List like this:
 List<Integer> list1 = List.of(1, 2, 3);
 ----
 
-Each of the List elements forms a separate List node. The tail of the last element is Nil, the empty List.
+Each of the List elements forms a separate List node.
+The tail of the last element is Nil, the empty List.
+
+每个列表元素构成一个单独的列表节点。
+最后一个元素的尾部是 Nil ，即空列表。
 
 image::images/list1.png?w=660[List 1]
 
 This enables us to share elements across different versions of the List.
+这使我们能够在不同版本的列表中共享元素。
 
 [source,java]
 ----
@@ -146,21 +219,45 @@ This enables us to share elements across different versions of the List.
 List<Integer> list2 = list1.tail().prepend(0);
 ----
 
-The new head element 0 is __linked__ to the tail of the original List. The original List remains unmodified.
+The new head element 0 is __linked__ to the tail of the original List.
+The original List remains unmodified.
+
+新的 head 元素 0 链接到原始列表的尾部。
+原始列表保持不变。
 
 image::images/list2.png?w=660[List 2]
 
-These operations take place in constant time, in other words they are independent of the List size. Most of the other operations take linear time. In Vavr this is expressed by the interface LinearSeq, which we may already know from Scala.
+These operations take place in constant time, in other words they are independent of the List size.
+Most of the other operations take linear time.
+In Vavr this is expressed by the interface LinearSeq, which we may already know from Scala.
 
-If we need data structures that are queryable in constant time, Vavr offers Array and Vector. Both have https://en.wikipedia.org/wiki/Random_access[random access] capabilities.
+这些操作在固定时间内进行，换句话说，它们与列表大小无关。
+大多数其他操作需要线性时间。
+在 Vavr 中，这是由接口 LinearSeq 表示的，我们可能已经从 Scala 中知道了。
 
-The Array type is backed by a Java array of objects. Insert and remove operations take linear time. Vector is in-between Array and List. It performs well in both areas, random access and modification.
+如果需要在恒定时间内可查询的数据结构，Vavr 提供数组（Array）和向量（Vector）。
+两者都具有 https://en.wikipedia.org/wiki/Random_access[随机访问]功能。
 
-In fact the linked List can also be used to implement a Queue data structure.
+The Array type is backed by a Java array of objects.
+Insert and remove operations take linear time.
+Vector is in-between Array and List.
+It performs well in both areas, random access and modification.
+
+数组类型由对象的 Java 数组支持。
+插入和删除操作需要线性时间。
+向量（Vector）位于数组和列表之间。
+它在随机访问和修改两个方面都表现良好。
+
+
+实际上，链表还可以用于实现队列（Queue）数据结构。
 
 ==== Queue
 
-A very efficient functional Queue can be implemented based on two linked Lists. The __front__ List holds the elements that are __dequeued__, the __rear__ List holds the elements that are __enqueued__. Both operations enqueue and dequeue perform in O(1).
+A very efficient functional Queue can be implemented based on two linked Lists.
+The __front__ List holds the elements that are __dequeued__, the __rear__ List holds the elements that are __enqueued__.
+Both operations enqueue and dequeue perform in O(1).
+
+基于两个链表可以实现一个非常高效的函数式队列。 前面的 List 保存 *出队* 的元素，后面的 List 保存 *入队* 的元素。 入队和出队操作执行都是 O(1) 复杂度。
 
 [source,java]
 ----
@@ -169,15 +266,22 @@ Queue<Integer> queue = Queue.of(1, 2, 3)
                             .enqueue(5);
 ----
 
-The initial Queue is created of three elements. Two elements are enqueued on the rear List.
+初始队列由三个元素创建。
+后面的 List 上有两个元素。
 
 image::images/queue1.png?w=660[Queue 1]
 
-If the front List runs out of elements when dequeueing, the rear List is reversed and becomes the new front List.
+如果出队时前面的 List 元素用完了，后面的 List 就会反转，成为新的前面的 List。
 
 image::images/queue2.png?w=660[Queue 2]
 
-When dequeueing an element we get a pair of the first element and the remaining Queue. It is necessary to return the new version of the Queue because functional data structures are immutable and persistent. The original Queue is not affected.
+When dequeueing an element we get a pair of the first element and the remaining Queue.
+It is necessary to return the new version of the Queue because functional data structures are immutable and persistent.
+
+当一个元素出队时，我们得到一对数据包括第一个元素和剩余的队列。
+有必要返回新版本的 Queue，因为函数式数据结构是不可变的和持久的。
+
+原始队列不会受到影响
 
 [source,java]
 ----
@@ -188,7 +292,12 @@ Tuple2<Integer, Queue<Integer>> dequeued =
         queue.dequeue();
 ----
 
-What happens when the Queue is empty? Then dequeue() will throw a NoSuchElementException. To do it the __functional way__ we would rather expect an optional result.
+What happens when the Queue is empty?
+Then dequeue() will throw a NoSuchElementException.
+To do it the __functional way__ we would rather expect an optional result.
+
+当队列为空时会发生什么？ 然后 dequeue() 将抛出 NoSuchElementException。
+为了以函数式的方式来做，我们宁愿期待一个为空的结果。
 
 [source,java]
 ----
@@ -200,6 +309,7 @@ Queue.empty().dequeueOption();
 ----
 
 An optional result may be further processed, regardless if it is empty or not.
+一个可选的结果可能会被进一步处理，不管它是否为空。
 
 [source,java]
 ----
@@ -220,9 +330,21 @@ Option<Queue<Integer>> remaining =
 
 ==== Sorted Set
 
-Sorted Sets are data structures that are more frequently used than Queues. We use binary search trees to model them in a functional way. These trees consist of nodes with up to two children and values at each node.
+Sorted Sets are data structures that are more frequently used than Queues.
+We use binary search trees to model them in a functional way.
+These trees consist of nodes with up to two children and values at each node.
 
-We build binary search trees in the presence of an ordering, represented by an element Comparator. All values of the left subtree of any given node are strictly less than the value of the given node. All values of the right subtree are strictly greater.
+Sorted Set 是比 Queue 更常用的数据结构。
+我们使用二叉搜索树以功能方式对它们进行建模。
+这些树由最多有两个子节点的节点和每个节点的值组成。
+
+We build binary search trees in the presence of an ordering, represented by an element Comparator.
+All values of the left subtree of any given node are strictly less than the value of the given node.
+All values of the right subtree are strictly greater.
+
+我们在存在排序的情况下构建二叉搜索树，由 Comparator 实现。
+任何给定节点的左子树的所有值都严格小于给定节点的值。
+右子树的所有值都严格大于左边。
 
 [source,java]
 ----
@@ -232,7 +354,13 @@ SortedSet<Integer> xs = TreeSet.of(6, 1, 3, 2, 4, 7, 8);
 
 image::images/binarytree1.png?w=660[Binary Tree 1]
 
-Searches on such trees run in O(log n) time. We start the search at the root and decide if we found the element. Because of the total ordering of the values we know where to search next, in the left or in the right branch of the current tree.
+Searches on such trees run in O(log n) time.
+We start the search at the root and decide if we found the element.
+Because of the total ordering of the values we know where to search next, in the left or in the right branch of the current tree.
+
+对此类树的搜索时间复杂度为 O(log n)。
+我们从根开始搜索并决定是否找到该元素。
+由于值的总排序，我们知道下一步在当前树的左侧或右侧分支中搜索的位置。
 
 [source,java]
 ----
@@ -244,7 +372,11 @@ Comparator<Integer> c = (a, b) -> b - a;
 SortedSet<Integer> reversed = TreeSet.of(c, 2, 3, 1, 2);
 ----
 
-Most tree operations are inherently https://en.wikipedia.org/wiki/Recursion[recursive]. The insert function behaves similarly to the search function. When the end of a search path is reached, a new node is created and the whole path is reconstructed up to the root. Existing child nodes are referenced whenever possible. Hence the insert operation takes O(log n) time and space.
+Most tree operations are inherently https://en.wikipedia.org/wiki/Recursion[recursive].
+The insert function behaves similarly to the search function.
+When the end of a search path is reached, a new node is created and the whole path is reconstructed up to the root.
+Existing child nodes are referenced whenever possible.
+Hence the insert operation takes O(log n) time and space.
 
 [source,java]
 ----
@@ -254,18 +386,26 @@ SortedSet<Integer> ys = xs.add(5);
 
 image::images/binarytree2.png?w=660[Binary Tree 2]
 
-In order to maintain the performance characteristics of a binary search tree it needs to be kept balanced. All paths from the root to a leaf need to have roughly the same length.
+In order to maintain the performance characteristics of a binary search tree it needs to be kept balanced.
+All paths from the root to a leaf need to have roughly the same length.
 
-In Vavr we implemented a binary search tree based on a https://en.wikipedia.org/wiki/Red%E2%80%93black_tree[Red/Black Tree]. It uses a specific coloring strategy to keep the tree balanced on inserts and deletes. To read more about this topic please refer to the book http://www.amazon.com/Purely-Functional-Structures-Chris-Okasaki/dp/0521663504[Purely Functional Data Structures] by Chris Okasaki.
+In Vavr we implemented a binary search tree based on a https://en.wikipedia.org/wiki/Red%E2%80%93black_tree[Red/Black Tree].
+It uses a specific coloring strategy to keep the tree balanced on inserts and deletes.
+To read more about this topic please refer to the book http://www.amazon.com/Purely-Functional-Structures-Chris-Okasaki/dp/0521663504[Purely Functional Data Structures] by Chris Okasaki.
 
 === State of the Collections
 
-Generally we are observing a convergence of programming languages. Good features make it, other disappear. But Java is different, it is bound forever to be backward compatible. That is a strength but also slows down evolution.
+Generally we are observing a convergence of programming languages.
+Good features make it, other disappear.
+But Java is different, it is bound forever to be backward compatible.
+That is a strength but also slows down evolution.
 
-Lambda brought Java and Scala closer together, yet they are still so different. Martin Odersky, the creator of Scala, recently mentioned in his https://www.youtube.com/watch?v=NW5h8d_ZyOs[BDSBTB 2015 keynote] the state of the Java 8 collections.
+Lambda brought Java and Scala closer together, yet they are still so different.
+Martin Odersky, the creator of Scala, recently mentioned in his https://www.youtube.com/watch?v=NW5h8d_ZyOs[BDSBTB 2015 keynote] the state of the Java 8 collections.
 
-He described Java’s Stream as a fancy form of an Iterator. The Java 8 Stream API is an example of a __lifted__ collection. What it does is to __define__ a computation and __link__ it to a specific collection in another explicit step.
-
+He described Java’s Stream as a fancy form of an Iterator.
+The Java 8 Stream API is an example of a __lifted__ collection.
+What it does is to __define__ a computation and __link__ it to a specific collection in another explicit step.
 
 [source,java]
 ----
@@ -275,7 +415,8 @@ i.prepareForAddition()
  .mapBackToInteger(Mappers.toInteger())
 ----
 
-This is how the new Java 8 Stream API works. It is a computational layer above the well known Java collections.
+This is how the new Java 8 Stream API works.
+It is a computational layer above the well known Java collections.
 
 [source,java]
 ----
@@ -286,7 +427,8 @@ Arrays.asList(1, 2, 3)
       .collect(Collectors.toList())
 ----
 
-Vavr is greatly inspired by Scala. This is how the above example should have been in Java 8.
+Vavr is greatly inspired by Scala.
+This is how the above example should have been in Java 8.
 
 [source,java]
 ----
@@ -294,11 +436,15 @@ Vavr is greatly inspired by Scala. This is how the above example should have bee
 Stream.of(1, 2, 3).map(Object::toString)
 ----
 
-Within the last year we put much effort into implementing the Vavr collection library. It comprises the most widely used collection types.
+Within the last year we put much effort into implementing the Vavr collection library.
+It comprises the most widely used collection types.
 
 ==== Seq
 
-We started our journey by implementing sequential types. We already described the linked List above. Stream, a lazy linked List, followed. It allows us to process possibly infinite long sequences of elements.
+We started our journey by implementing sequential types.
+We already described the linked List above.
+Stream, a lazy linked List, followed.
+It allows us to process possibly infinite long sequences of elements.
 
 image::images/collections-seq.png?w=660[Seq]
 
@@ -320,7 +466,8 @@ List.of("Java", "Advent").forEach(s -> {
 });
 ----
 
-Anyway, as we previously saw we prefer expressions that return a value over statements that return nothing. By looking at a simple example, soon we will recognize that statements add noise and divide what belongs together.
+Anyway, as we previously saw we prefer expressions that return a value over statements that return nothing.
+By looking at a simple example, soon we will recognize that statements add noise and divide what belongs together.
 
 [source,java]
 ----
@@ -336,7 +483,8 @@ String join(String... words) {
 }
 ----
 
-The Vavr collections provide us with many functions to operate on the underlying elements. This allows us to express things in a very concise way.
+The Vavr collections provide us with many functions to operate on the underlying elements.
+This allows us to express things in a very concise way.
 
 [source,java]
 ----
@@ -348,7 +496,9 @@ String join(String... words) {
 }
 ----
 
-Most goals can be accomplished in various ways using Vavr. Here we reduced the whole method body to fluent function calls on a List instance. We could even remove the whole method and directly use our List to obtain the computation result.
+Most goals can be accomplished in various ways using Vavr.
+Here we reduced the whole method body to fluent function calls on a List instance.
+We could even remove the whole method and directly use our List to obtain the computation result.
 
 [source,java]
 ----
@@ -359,15 +509,20 @@ In a real world application we are now able to drastically reduce the number of 
 
 ==== Set and Map
 
-Sequences are great. But to be complete, a collection library also needs different types of Sets and Maps.
+Sequences are great.
+But to be complete, a collection library also needs different types of Sets and Maps.
 
 image::images/collections-set-map.png?w=660[Set and Map]
 
-We described how to model sorted Sets with binary tree structures. A sorted Map is nothing else than a sorted Set containing key-value pairs and having an ordering for the keys.
+We described how to model sorted Sets with binary tree structures.
+A sorted Map is nothing else than a sorted Set containing key-value pairs and having an ordering for the keys.
 
-The HashMap implementation is backed by a http://lampwww.epfl.ch/papers/idealhashtrees.pdf[Hash Array Mapped Trie (HAMT)]. Accordingly the HashSet is backed by a HAMT containing key-key pairs.
+The HashMap implementation is backed by a http://lampwww.epfl.ch/papers/idealhashtrees.pdf[Hash Array Mapped Trie (HAMT)].
+Accordingly the HashSet is backed by a HAMT containing key-key pairs.
 
-Our Map does __not__ have a special Entry type to represent key-value pairs. Instead we use Tuple2 which is already part of Vavr. The fields of a Tuple are enumerated.
+Our Map does __not__ have a special Entry type to represent key-value pairs.
+Instead we use Tuple2 which is already part of Vavr.
+The fields of a Tuple are enumerated.
 
 [source,java]
 ----
@@ -378,7 +533,8 @@ Integer key = entry._1;
 String value = entry._2;
 ----
 
-Maps and Tuples are used throughout Vavr. Tuples are inevitable to handle multi-valued return types in a general way.
+Maps and Tuples are used throughout Vavr.
+Tuples are inevitable to handle multi-valued return types in a general way.
 
 [source,java]
 ----
@@ -389,4 +545,6 @@ List.of(1, 2, 3, 4).groupBy(i -> i % 2);
 List.of('a', 'b', 'c').zipWithIndex();
 ----
 
-At Vavr, we explore and test our library by implementing the https://projecteuler.net/archives[99 Euler Problems]. It is a great proof of concept. Please don’t hesitate to send pull requests.
+At Vavr, we explore and test our library by implementing the https://projecteuler.net/archives[99 Euler Problems].
+It is a great proof of concept.
+Please don’t hesitate to send pull requests.

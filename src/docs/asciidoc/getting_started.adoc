@@ -37,17 +37,20 @@ dependencies {
 </dependencies>
 ----
 
-=== Standalone
+=== 单独使用
 
-Because Vavr does __not__ depend on any libraries (other than the JVM) you can easily add it as standalone .jar to your classpath.
+
+因为 Vavr 不依赖任何库（除了 JVM），所以你可以容易地将它作为独立的 .jar 添加到你的类路径。
 
 === Snapshots
 
-Developer versions can be found https://oss.sonatype.org/content/repositories/snapshots/io/vavr/vavr[here].
+
+开发者版本可以在 https://oss.sonatype.org/content/repositories/snapshots/io/vavr/vavr[这里]找到.
 
 ==== Gradle
 
-Add the additional snapshot repository to your `build.gradle`:
+
+在你的 `build.gradle` 中添加额外的快照仓库:
 
 [source,groovy]
 ----
@@ -59,7 +62,8 @@ repositories {
 
 ==== Maven
 
-Ensure that your ``~/.m2/settings.xml`` contains the following:
+
+确保你的 ``~/.m2/settings.xml`` 包含以下内容:
 
 [source,xml]
 ----
