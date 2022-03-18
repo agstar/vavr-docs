@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        jcenter()
+//        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -20,7 +20,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 repositories {
-    jcenter()
+//    jcenter()
     mavenCentral()
     maven {
         url "https://oss.sonatype.org/content/repositories/snapshots"
@@ -72,19 +72,19 @@ task copyCNAME(type: Copy) {
 copyCNAME.dependsOn asciidoctor
 publishGhPages.dependsOn copyCNAME
 
-githubPages {
-    repoUri = 'https://github.com/vavr-io/vavr-docs.git'
-
-    credentials {
-        username = project.githubUser
-        password = project.githubPassword
-    }
-
-    pages {
-        from file(asciidoctor.outputDir.path + '/html5')
-        // into project.version
-    }
-}
+//githubPages {
+//    repoUri = 'https://github.com/vavr-io/vavr-docs.git'
+//
+//    credentials {
+//        username = project.githubUser
+//        password = project.githubPassword
+//    }
+//
+//    pages {
+//        from file(asciidoctor.outputDir.path + '/html5')
+//        // into project.version
+//    }
+//}
 
 watch {
     asciidoc {

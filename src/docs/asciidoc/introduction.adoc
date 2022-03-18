@@ -620,4 +620,4 @@ Please don’t hesitate to send pull requests.
 
 在 Vavr，我们通过实施 https://projecteuler.net/archives[99 Euler Problems] 来探索和测试我们的库。
 这是一个很好的概念证明。
-请不要犹豫，发送 pull request。
+请不要犹豫，提交 pull request。
